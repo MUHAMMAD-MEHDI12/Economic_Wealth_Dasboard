@@ -184,6 +184,14 @@ ECON.sectors.forEach((s) => {
   const sum = s.prof.reduce((a, b) => a + b, 0);
   s.profN = s.prof.map((p) => p / sum);
 });
+/* ════════ REAL DATA: VIIRS night-time lights 2025 ════════ */
+const NTL = PASTE_HERE;
+const ntlMap = new Map(NTL.cells.map(([c, r, v]) => [c + "," + r, v]));
+
+const LAHORE_DAILY_GDP_M = 65000;
+const CELL_KM2 = (NTL.px * 111.32) * (NTL.px * 94.9);
+const TOTAL_LOG_RAD = NTL.cells.reduce((s, x) => s + Math.log1p(x[2]), 0);
+const K_CALIB = LAHORE_DAILY_GDP_M / (TOTAL_LOG_RAD * CELL_KM2);
 
 /* ════════ GEO MATH ════════ */
 const D2R = Math.PI / 180;
