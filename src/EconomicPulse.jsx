@@ -223,12 +223,10 @@ const destKm = (lat, lng, km, brgDeg) => ({
 
 /* ════════ ECONOMIC ANALYSIS (sampling, auto-clipped to district) ════════ */
 function densityAt(lat, lng) {
-  let d = ECON.ruralBase;
-  for (const n of ECON.nuclei) {
-    const dx = (lng - n.lng) * kmLng(lat), dy = (lat - n.lat) * KM_LAT;
-    d += n.D0 * Math.exp(-Math.sqrt(dx * dx + dy * dy) / n.lambda);
-  }
-  return d;
+  const c = Math.floor((lng - NTL.lng0) / NTL.px);
+  const r = Math.floor((NTL.lat0 - lat) / NTL.px);
+  const rad = ntlMap.get(c + "," + r) ?? 0;
+  return K_CALIB * Math.log1p(rad);
 }
 function analyseCircle(center, radiusKm) {
   const RINGS = 18, SECT = 20;
