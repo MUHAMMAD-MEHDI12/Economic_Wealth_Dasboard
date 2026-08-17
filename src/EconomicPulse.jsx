@@ -178,6 +178,7 @@ const ECON = {
     { name: "Walled City", lat: 31.583, lng: 74.312 },
     { name: "DHA", lat: 31.479, lng: 74.388 },
     { name: "Johar Town", lat: 31.464, lng: 74.271 },
+    { name: "Punjab University", lat: 31.4830, lng: 74.2670 },
   ],
 };
 ECON.sectors.forEach((s) => {
@@ -773,6 +774,7 @@ export default function App() {
     return list;
   }, []);
 
+  const searchTimer = useRef(null);
   const onSearch = (text) => {
     setQ(text);
     const t = text.trim().toLowerCase();
@@ -783,9 +785,26 @@ export default function App() {
       if (n.startsWith(t)) starts.push(item);
       else if (n.includes(t)) incl.push(item);
     }
-    setSugs([...starts, ...incl].slice(0, 8));
+    setSugs([...starts, ...incl].slice(0, 5));
+    clearTimeout(searchTimer.current);
+    if (t.length < 3) return;
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const url = "https://nominatim.openstreetmap.org/search?format=json&limit=6"
+          + "&viewbox=74.00,31.75,74.66,31.19&bounded=1&q=" + encodeURIComponent(text);
+        const r = await fetch(url, { headers: { "Accept-Language": "en" } });
+        const js = await r.json();
+        const online = js
+          .filter((x) => pointInLahore(parseFloat(x.lon), parseFloat(x.lat)))
+          .map((x) => ({ n: x.display_name.split(",").slice(0, 2).join(", "),
+                          lat: parseFloat(x.lat), lng: parseFloat(x.lon), online: true }));
+        setSugs((prev) => {
+          const seen = new Set(prev.map((p) => p.n.toLowerCase()));
+          return [...prev, ...online.filter((o) => !seen.has(o.n.toLowerCase()))].slice(0, 8);
+        });
+      } catch (e) { }
+    }, 400);
   };
-
   const goTo = (item) => {
     setShape((s) => ({ type: "circle", center: { lat: item.lat, lng: item.lng },
       radiusKm: s?.radiusKm ?? 4, name: item.n }));
@@ -889,7 +908,7 @@ export default function App() {
                   onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                   style={{ padding: "7px 12px", fontSize: 12.5, cursor: "pointer", color: T.text,
                     borderBottom: "1px solid rgba(38,49,75,0.4)" }}>
-                  {s.n}
+                  {s.n}{s.online && <span style={{ color: T.muted, fontSize: 10.5 }}> · OSM</span>}
                 </div>
               ))}
             </div>
