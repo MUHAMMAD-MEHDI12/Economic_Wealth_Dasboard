@@ -178,7 +178,7 @@ const ECON = {
     { name: "Walled City", lat: 31.583, lng: 74.312 },
     { name: "DHA", lat: 31.479, lng: 74.388 },
     { name: "Johar Town", lat: 31.464, lng: 74.271 },
-    { name: "Punjab University", lat: 31.4830, lng: 74.2670 },
+    { name: "Punjab University", lat: 31.500290, lng:74.298942 },
   ],
 };
 ECON.sectors.forEach((s) => {
